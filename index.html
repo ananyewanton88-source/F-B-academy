@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#172a3a"><meta name="description" content="F&B Academy — обучение персонала ресторана и лобби-бара">
+<title>F&B Academy — обучение команды</title>
+<style>
+:root{--navy:#172a3a;--ink:#18212b;--muted:#64717d;--lav:#a89bc9;--paper:#f5f6f8;--line:#e1e6eb;--white:#fff;--gold:#c4a76c}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Arial,sans-serif;line-height:1.45}.hero{background:linear-gradient(135deg,#172a3a,#30495b);color:white;padding:30px 18px 26px;border-radius:0 0 24px 24px}.wrap{max-width:960px;margin:auto}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:#d7d1e8;font-weight:700}.hero h1{font-size:clamp(28px,6vw,42px);line-height:1.05;margin:12px 0}.hero p{color:#e2e8ed;max-width:620px;margin:0}.tag{display:inline-block;border:1px solid #607385;border-radius:99px;padding:6px 10px;font-size:12px;margin-top:18px}.content{padding:22px 16px 42px}.section-title{font-size:20px;margin:4px 0 12px}.intro{color:var(--muted);font-size:14px;margin:0 0 18px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{background:white;border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:0 2px 7px #1b2c3c08;display:flex;flex-direction:column;min-height:180px}.card .icon{font-size:25px;margin-bottom:10px}.card h3{font-size:17px;margin:0 0 7px}.card p{font-size:13px;color:var(--muted);margin:0 0 16px;flex:1}.btn{display:block;text-align:center;text-decoration:none;border:0;border-radius:11px;padding:12px 13px;background:var(--navy);color:white;font-weight:700;font-size:14px;cursor:pointer}.btn.secondary{background:#eeebf5;color:#443b5c}.btn.disabled{background:#e9edf0;color:#697681;cursor:not-allowed}.wide{margin-top:22px}.notice{padding:14px;border:1px solid #e7dfc8;background:#fbf8ef;border-radius:14px;font-size:13px;color:#645638;margin-top:20px}.admin{margin-top:22px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px}.admin h2{font-size:18px;margin:0 0 8px}.admin p{font-size:13px;color:var(--muted)}.small{font-size:12px;color:var(--muted)}footer{text-align:center;padding:0 16px 28px;color:var(--muted);font-size:12px}a{color:inherit}@media(min-width:700px){.hero{padding:42px 26px 34px}.content{padding:28px 24px 50px}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.card{padding:20px}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap"><div class="eyebrow">Learning · Service · Beverage knowledge</div><h1>F&B Academy</h1><p>Короткие тренировки и экзамены для команды ресторана и лобби-бара. Открой модуль с телефона, потренируйся и проверь знания.</p><span class="tag">Для команды до 20 сотрудников</span></div></header>
+<main class="content wrap">
+<section><h2 class="section-title">Учебные модули</h2><p class="intro">Тренируйся в удобное время. Практические тренажёры открываются прямо в браузере телефона.</p>
+<div class="grid">
+<article class="card"><div class="icon">🍸</div><h3>Лобби-бар: коктейли</h3><p>Составы, дозировки и техника приготовления по подготовленному тренажёру.</p><a class="btn" href="trainers/lobby-bar.html">Открыть тренажёр</a></article>
+<article class="card"><div class="icon">🍷</div><h3>Вино</h3><p>Учебные карточки вин, характеристики и знания по винной карте.</p><a class="btn" href="trainers/service-wine-spirits.html">Открыть материалы</a></article>
+<article class="card"><div class="icon">🥃</div><h3>Крепкий алкоголь</h3><p>Карточки крепкого алкоголя и основы ориентирования в ассортименте.</p><a class="btn" href="trainers/service-wine-spirits.html">Открыть материалы</a></article>
+<article class="card"><div class="icon">🤝</div><h3>Сервис</h3><p>Вопросы и ситуации по обслуживанию гостей.</p><a class="btn" href="trainers/service-wine-spirits.html">Открыть тренажёр</a></article>
+<article class="card"><div class="icon">📝</div><h3>Экзамен: коктейли</h3><p>Итоговая проверка с сохранением результата в общей таблице после настройки ссылки.</p><a id="exam-cocktails" class="btn disabled" href="#" aria-disabled="true">Ссылка ещё не добавлена</a></article>
+<article class="card"><div class="icon">🎓</div><h3>Итоговый экзамен</h3><p>Проверка знаний команды. Для результатов используйте персональное имя в форме.</p><a id="exam-final" class="btn disabled" href="#" aria-disabled="true">Ссылка ещё не добавлена</a></article>
+</div></section>
+<section class="wide"><h2 class="section-title">Экзамены по темам</h2><div class="grid">
+<article class="card"><div class="icon">🍇</div><h3>Экзамен: вино</h3><p>Результат фиксируется в Google Forms после настройки ссылки.</p><a id="exam-wine" class="btn disabled" href="#" aria-disabled="true">Настроить ссылку</a></article>
+<article class="card"><div class="icon">🥃</div><h3>Экзамен: крепкий алкоголь</h3><p>Результат фиксируется в Google Forms после настройки ссылки.</p><a id="exam-spirits" class="btn disabled" href="#" aria-disabled="true">Настроить ссылку</a></article>
+<article class="card"><div class="icon">🛎️</div><h3>Экзамен: сервис</h3><p>Результат фиксируется в Google Forms после настройки ссылки.</p><a id="exam-service" class="btn disabled" href="#" aria-disabled="true">Настроить ссылку</a></article>
+</div></section>
+<div class="notice"><strong>Важно.</strong> Сейчас учебные тренажёры доступны без регистрации и могут работать автономно в браузере. Чтобы руководитель видел общие результаты всех сотрудников, нужно добавить ссылки на экзамены Google Forms. В формах сотрудник вводит имя вручную; если не включать ограничение «один ответ», Google не требует входа, но личность участника автоматически не подтверждается.</div>
+<section class="admin"><h2>Руководителю</h2><p>После подключения экзаменов ответы и баллы собираются в закрытую Google Sheets. Не размещай на публичном сайте внутренние таблицы с ключами ответов или данными сотрудников.</p><p class="small">Ссылки на экзамены добавляются в файл <b>config.js</b>. Таблицу с результатами открывай отдельно из своего аккаунта Google — не размещай её ссылку на публичном портале.</p></section>
+</main><footer>F&B Academy · Учебные материалы для внутреннего обучения команды</footer>
+<script src="config.js"></script><script>
+(function(){const c=window.FNB_CONFIG||{};const map={cocktails:'exam-cocktails',wine:'exam-wine',spirits:'exam-spirits',service:'exam-service',final:'exam-final'};Object.keys(map).forEach(k=>{const el=document.getElementById(map[k]);const url=(c.exams||{})[k];if(el&&url){el.href=url;el.target='_blank';el.rel='noopener';el.classList.remove('disabled');el.removeAttribute('aria-disabled');el.textContent='Перейти к экзамену';}});})();
+</script>
+</body></html>
