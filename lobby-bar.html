@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lobby Bar — интерактивный тренажёр коктейлей</title>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#182230;--muted:#657184;--navy:#17365d;--blue:#e7f0fa;--line:#dce3ec;--gold:#fff0c2;--green:#e0f2e8;--red:#fde6e4;--shadow:0 8px 28px rgba(22,42,68,.08)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,#132b49,#234f7d);color:#fff;padding:24px max(18px,calc((100vw - 1100px)/2));}
+header h1{font-size:clamp(24px,4vw,34px);line-height:1.15;margin:0 0 8px}header p{margin:0;color:#d8e5f4;max-width:800px}
+main{max-width:1100px;margin:22px auto;padding:0 16px 40px}.top{display:grid;grid-template-columns:1.4fr .8fr;gap:16px}.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+h2{font-size:21px;margin:0 0 12px}h3{font-size:17px;margin:0 0 8px}.muted{color:var(--muted);font-size:14px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chip{background:var(--blue);color:var(--navy);padding:5px 10px;border-radius:999px;font-size:13px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.btn{border:0;border-radius:11px;padding:11px 15px;font-weight:650;cursor:pointer;background:var(--navy);color:#fff;font-size:14px}.btn.secondary{background:#edf1f6;color:#223247}.btn.outline{background:#fff;color:var(--navy);border:1px solid var(--line)}.btn:disabled{opacity:.45;cursor:not-allowed}
+select,input{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;background:#fff;color:var(--ink)}label{display:block;font-weight:650;font-size:14px;margin:10px 0 6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#f7f9fc;border:1px solid var(--line);border-radius:13px;padding:12px}.stat strong{display:block;font-size:24px;color:var(--navy)}.stat span{font-size:12px;color:var(--muted)}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.tab{border:1px solid var(--line);background:#fff;color:#344256;padding:10px 14px;border-radius:999px;cursor:pointer;font-weight:650}.tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.view{display:none}.view.active{display:block}.recipe-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.recipe{border:1px solid var(--line);border-radius:14px;padding:15px;background:#fff;cursor:pointer;text-align:left;color:inherit}.recipe:hover{border-color:#7997ba;background:#fbfdff}.recipe strong{display:block;margin-bottom:4px}.recipe small{color:var(--muted)}
+.detail{margin-top:16px;border:1px solid var(--line);border-radius:14px;padding:16px;background:#fbfcfe}.detail ul{padding-left:20px}.raw{white-space:pre-wrap;background:#f6f8fb;border:1px solid var(--line);padding:12px;border-radius:10px}
+.question{font-size:19px;font-weight:750;margin:8px 0 15px}.options{display:grid;gap:9px}.option{padding:12px 14px;text-align:left;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font:inherit}.option:hover{border-color:#7997ba}.option.correct{background:var(--green);border-color:#5eaa7d}.option.wrong{background:var(--red);border-color:#cf7770}.feedback{margin-top:12px;padding:12px;border-radius:10px;display:none}.feedback.show{display:block}.feedback.ok{background:var(--green)}.feedback.no{background:var(--red)}.progress{height:8px;border-radius:20px;background:#e4e9f0;overflow:hidden;margin:12px 0}.progress div{height:100%;width:0;background:#4c82b8;transition:width .2s}
+.fieldgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tag{display:inline-block;font-size:12px;padding:4px 8px;border-radius:7px;background:#edf1f6;color:#3c4b5e}.footer{color:var(--muted);font-size:12px;text-align:center;margin:24px 0 0}
+@media(max-width:760px){.top{grid-template-columns:1fr}.recipe-list{grid-template-columns:1fr}.panel,.card{padding:16px}main{margin-top:14px}.stats{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header>
+<h1>Lobby Bar · Тренажёр коктейлей</h1>
+<p>Интерактивное обучение барменов по исходным ТТК. Изучай рецептуры, проверяй дозировки, запоминай посуду и технику, проходи тесты.</p>
+</header>
+<main>
+<div class="top">
+<section class="panel">
+<h2>Рабочая панель</h2>
+<div class="muted">Тренажёр использует 23 коктейля из загруженного файла. Рецептуры не дополняются догадками: исходные формулировки сохранены.</div>
+<div class="chips"><span class="chip">23 коктейля</span><span class="chip">4 режима обучения</span><span class="chip">Мгновенная проверка</span></div>
+<div class="controls"><button class="btn" onclick="startQuiz('all')">Начать полный тест</button><button class="btn secondary" onclick="switchTab('cards')">Учить карточки</button></div>
+</section>
+<section class="panel">
+<h2>Мой прогресс</h2>
+<div class="stats"><div class="stat"><strong id="answered">0</strong><span>ответов</span></div><div class="stat"><strong id="correct">0</strong><span>верно</span></div><div class="stat"><strong id="percent">—</strong><span>точность</span></div></div>
+<div class="progress"><div id="progressbar"></div></div>
+<div class="muted">Прогресс хранится в текущем сеансе страницы и не отправляется на сервер.</div>
+</section>
+</div>
+<div class="nav">
+<button class="tab active" data-tab="cards" onclick="switchTab('cards')">Карточки коктейлей</button>
+<button class="tab" data-tab="quiz" onclick="switchTab('quiz')">Тест знаний</button>
+<button class="tab" data-tab="build" onclick="switchTab('build')">Собери рецепт</button>
+<button class="tab" data-tab="review" onclick="switchTab('review')">Повторение</button>
+</div>
+<section id="cards" class="view active">
+<div class="panel">
+<h2>Карточки коктейлей</h2>
+<div class="fieldgrid">
+<div><label for="categoryFilter">Категория</label><select id="categoryFilter" onchange="renderRecipes()"><option value="all">Все категории</option></select></div>
+<div><label for="search">Поиск коктейля</label><input id="search" placeholder="Например, Беллини" oninput="renderRecipes()"></div>
+</div>
+<div class="recipe-list" id="recipeList"></div>
+<div id="recipeDetail"></div>
+</div>
+</section>
+<section id="quiz" class="view">
+<div class="panel">
+<h2>Тест знаний</h2><p class="muted">Вопросы проверяют состав, дозировки, посуду, технику и технологию. Правильные ответы формируются только из текста ТТК.</p>
+<div class="fieldgrid">
+<div><label for="quizMode">Режим</label><select id="quizMode"><option value="all">Смешанный тест</option><option value="ingredients">Состав и дозировки</option><option value="method">Посуда и техника</option><option value="steps">Технология приготовления</option></select></div>
+<div><label for="quizCount">Количество вопросов</label><select id="quizCount"><option>10</option><option>15</option><option>23</option><option value="all">Все доступные</option></select></div>
+</div>
+<div class="controls"><button class="btn" onclick="startQuiz()">Начать тест</button><button class="btn secondary" onclick="resetSession()">Сбросить результат</button></div>
+<div id="quizArea" class="detail"><p class="muted">Выбери режим и нажми «Начать тест».</p></div>
+</div>
+</section>
+<section id="build" class="view">
+<div class="panel">
+<h2>Собери рецепт по памяти</h2>
+<p class="muted">Выбери коктейль, затем впиши состав и дозировки как помнишь. Сверься с исходной ТТК. Автоматическая оценка текста не используется, потому что порядок и написание ингредиентов могут различаться.</p>
+<label for="buildRecipe">Коктейль</label><select id="buildRecipe"></select>
+<label for="buildAnswer">Состав и дозировки по памяти</label><textarea id="buildAnswer" rows="4" style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit" placeholder="Например: ингредиент — количество..."></textarea>
+<label for="buildMethod">Посуда, техника и приготовление</label><textarea id="buildMethod" rows="3" style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit" placeholder="Опиши последовательность приготовления..."></textarea>
+<div class="controls"><button class="btn" onclick="revealBuild()">Показать эталон из ТТК</button><button class="btn secondary" onclick="clearBuild()">Очистить ответы</button></div>
+<div id="buildResult"></div>
+</div>
+</section>
+<section id="review" class="view">
+<div class="panel">
+<h2>Повторение и контроль</h2>
+<p>Здесь собраны карточки, которые удобно повторять перед сменой. Можно выбрать случайный коктейль и проговорить рецептуру вслух.</p>
+<div class="controls"><button class="btn" onclick="randomRecipe()">Случайный коктейль</button><button class="btn secondary" onclick="switchTab('cards')">Открыть все карточки</button></div>
+<div id="randomCard" class="detail"><p class="muted">Нажми «Случайный коктейль» для тренировки.</p></div>
+</div>
+</section>
+<p class="footer">Учебный материал по файлу «ттк лобби.xlsx». При обнаружении неоднозначности ориентируйся на утверждённую внутреннюю ТТК и уточняй её у руководителя.</p>
+</main>
+<script>
+const recipes = [{"category": "Апперитивные коктейли", "name": "беллини 0.18мл", "ingredients": "Игристое Меланж120мл,пюре персик 30гр,ликер персик 20мл.", "method": "Флюте, билд;Налить все ингридиенты в смесительный стакан, нежно стироват,перелить в бокал Флют.", "glass_tech": "Флюте, билд", "steps": "Налить все ингридиенты в смесительный стакан, нежно стироват,перелить в бокал Флют."}, {"category": "Апперитивные коктейли", "name": "Фиеро Тоник 0.2мл", "ingredients": "Мартини фиеро 100мл, Тоник (стекло)100мл ,слаиз апельсин 20гр.", "method": "Винный бок. Билд;Все ингридиенты налить в винный бокал на лед перемешать барной ложкой декор слаиз апельсин", "glass_tech": "Винный бок. Билд", "steps": "Все ингридиенты налить в винный бокал на лед перемешать барной ложкой декор слаиз апельсин"}, {"category": "Апперитивные коктейли", "name": "россини 0.18мл", "ingredients": "Игристое Меланж120мл,пюре клубника 30гр,ликер клубника 20мл.", "method": "Флюте, билд;Налить все ингридиенты в смесительный стакан, нежно стироват,перелить в бокал Флют.", "glass_tech": "Флюте, билд", "steps": "Налить все ингридиенты в смесительный стакан, нежно стироват,перелить в бокал Флют."}, {"category": "Апперитивные коктейли", "name": "Апероль спритс 0.23", "ingredients": "Апероль 70 мл. игоистое Меланж 120,содовая 50мл апельсин 20гр", "method": "Винный бок. Билд;Все ингридиенты налить в винный бокал на лед перемешать барной ложкой декор слаиз апельсин", "glass_tech": "Винный бок. Билд", "steps": "Все ингридиенты налить в винный бокал на лед перемешать барной ложкой декор слаиз апельсин"}, {"category": "Апперитивные коктейли", "name": "Френч 75 0.16мл", "ingredients": "Джин Хопперс 30мл,Игристое Меланж 80мл,сироп Сахар 20мл,Фрешь лимон 30мл", "method": "Винный бок. Шейк дабл стрейн;Все ингридиенты кроме игристого добавить в шейкер, интенсивно потрясти, отфильтровать в винный бокал со льдом,добавить игристое перемешать барной ложкой,декор цедра лимон", "glass_tech": "Винный бок. Шейк дабл стрейн", "steps": "Все ингридиенты кроме игристого добавить в шейкер, интенсивно потрясти, отфильтровать в винный бокал со льдом,добавить игристое перемешать барной ложкой,декор цедра лимон"}, {"category": "На виски", "name": "виски сауэр 0.1мл", "ingredients": "Бурбон Джим Бим 50 мл ,сахарный сироп 30мл,молоч.кислота 20мл. Бабл дропс 5капель,ангостура 1мл, апельсин20гр.", "method": "Шейк,драй шейк,дабл стрейн;все ингридиенты кроме ангостуры и бабл дропс добавить в шейкер ,интенсивно потрясти,отфильтровать в шейкер без льда,добавить 5 капель бабл дропс,интенсивно потрясти,перелить через сито в рокс на лед,капнуть сверху ангостуру,декор чипс апельсин", "glass_tech": "Шейк,драй шейк,дабл стрейн", "steps": "все ингридиенты кроме ангостуры и бабл дропс добавить в шейкер ,интенсивно потрясти,отфильтровать в шейкер без льда,добавить 5 капель бабл дропс,интенсивно потрясти,перелить через сито в рокс на лед,капнуть сверху ангостуру,декор чипс апельсин"}, {"category": "На виски", "name": "олд фэшн 0.1мл", "ingredients": "Бурбон Джим Бим 50мл,сахар тросниковый 10гр,ангостура 1 мл", "method": "Билд Рокс; тросниковый сахар добавить в смесительный стакан с ангостурой,размешать до растворения сахара,бобавить бурбон,добавитиь лед ,отстировать в рокс со льдом,декор цедра апельсин,спрыснуть сок цедра апельсин", "glass_tech": "Билд Рокс", "steps": "тросниковый сахар добавить в смесительный стакан с ангостурой,размешать до растворения сахара,бобавить бурбон,добавитиь лед ,отстировать в рокс со льдом,декор цедра апельсин,спрыснуть сок цедра апельсин"}, {"category": "На роме", "name": "Мохито 0.3мл", "ingredients": "Ром Коладос бел 50мл,сахар сироп 20мл,сахар песок 5гр ,мята 15гр,лайм св 30гр,содовая 150мл", "method": "Дабл рокс,билд;Мята(предварительно хлопнуть) Лайм сироп ,ром все добавить в дабл рокс,придавить мадлером ,бобавить колотый лед,,добавить содовую,все перемешать барной ложкой приподнимая содержимое со дна ,декор пучок мяты,лайм св.", "glass_tech": "Дабл рокс,билд", "steps": "Мята(предварительно хлопнуть) Лайм сироп ,ром все добавить в дабл рокс,придавить мадлером ,бобавить колотый лед,,добавить содовую,все перемешать барной ложкой приподнимая содержимое со дна ,декор пучок мяты,лайм св."}, {"category": "На роме", "name": "Дайкири 0.1мл", "ingredients": "Ром Коладос бел 50мл,сахар сироп 20мл,Лаим св 20гр,Молоч кисл П/Ф 20мл", "method": "Шале,шейк Дабл Стрейн;Все ингридиенты добавить в шейкер,интенсивно потрясти,отфильтровать в охлажденный бокад шале,декор слайз св. лаим", "glass_tech": "Шале,шейк Дабл Стрейн", "steps": "Все ингридиенты добавить в шейкер,интенсивно потрясти,отфильтровать в охлажденный бокад шале,декор слайз св. лаим"}, {"category": "На роме", "name": "Май Тай 0.2мл", "ingredients": "Ром Коладос бел 25мл,Ром Коладос прян 25мл,Ром Коладос темн.25мл,пюре ананас 80мл, сироп сахар 20мл,,молочн. Кисл П/Ф 20мл,мята св.5 гр ,лаим св.10гр.", "method": "Рокс,шейк пур;Все инридиенты добавить в шейкер ,интенсивно встряхнуть ,перелить в охлажденный рокс,декор добавить сверху колотый лед, пучок мяты.", "glass_tech": "Рокс,шейк пур", "steps": "Все инридиенты добавить в шейкер ,интенсивно встряхнуть ,перелить в охлажденный рокс,декор добавить сверху колотый лед, пучок мяты."}, {"category": "На джине", "name": "Джин Тоник 0.2мл", "ingredients": "Джин Хопперс 50мл,Тоник 125мл,Лайм св 20гр,молоч.кисл П\\Ф 10мл", "method": "Дабл рокс Билд;все ингридиенты добавить в Дабл рокс со льдом,перемешать барной ложкой ,декор слаиз огурец.", "glass_tech": "Дабл рокс Билд", "steps": "все ингридиенты добавить в Дабл рокс со льдом,перемешать барной ложкой ,декор слаиз огурец."}, {"category": "На джине", "name": "Кловер Клаб 0,14мл", "ingredients": "Джин Хопперс 50мл,пюре Малина 50гр,сах.сироп 20мл,молоч.кисл П/Ф 20 бабал дропс 5 капель", "method": "Шале,шейк дабл стрейн;все ингридиенты добавить в шейкер кроме бабал дропс,интенсивно потрясти ,отфильтровать в пустой шейкер,добавить 5 капель бабал дропс, интенсивно потрясти в шейкере безольда ,отфильтровать в охдажденный шале", "glass_tech": "Шале,шейк дабл стрейн", "steps": "все ингридиенты добавить в шейкер кроме бабал дропс,интенсивно потрясти ,отфильтровать в пустой шейкер,добавить 5 капель бабал дропс, интенсивно потрясти в шейкере безольда ,отфильтровать в охдажденный шале"}, {"category": "На джине", "name": "Негрони 0.100мл", "ingredients": "30мл Кампари,30 мл джин хопперс ,30мл Мартини Россо,апельсин 20гр", "method": "рокс,билд & стир; Наполните бокал льдом, добавьте джин, Кампари и красный вермут, . Перемешайте и украсьте апельсиновой цедрой.", "glass_tech": "рокс,билд & стир", "steps": "Наполните бокал льдом, добавьте джин, Кампари и красный вермут, . Перемешайте и украсьте апельсиновой цедрой."}, {"category": "На джине", "name": "Гимлет 0.1мл", "ingredients": "Джин хопперс 50мл,Содовая 100мл,сироп Сахар 20мл,Фрешь Лайм 30гр", "method": "Дегустационный бокал большой;Все ингридиенты добавить в шейкер со льдом,шейк ,декор Лайм", "glass_tech": "Дегустационный бокал большой", "steps": "Все ингридиенты добавить в шейкер со льдом,шейк ,декор Лайм"}, {"category": "На водке", "name": "Кровавая мэри 0.25мл", "ingredients": "Водка Зерно 50мл,сахар 10мл ,молоч.кисл П/Ф 10мл хрен 10гр,Сельдерей 30гр Сок томат 130мл,соус табаско 1 мл,соус Ворчестер1мл ,соль 1гр,перец 1 гр", "method": "Шейк-пур ,дабл рокс;Все ингридиенты добавить в шейкер ,плавно перекатами перемешать,перелить все содержимое в дабл рокс,декор стебель сельдерея ,чипс лимон", "glass_tech": "Шейк-пур ,дабл рокс", "steps": "Все ингридиенты добавить в шейкер ,плавно перекатами перемешать,перелить все содержимое в дабл рокс,декор стебель сельдерея ,чипс лимон"}, {"category": "На водке", "name": "космополитан 0.12мл", "ingredients": "Водка Зерно 40мл трип сек 20мл,сахар 10мл ,молоч.кисл П/Ф пюре клюква 50,лимон 10 гр", "method": "Шейк,Шале ;Все ингридиенты добавить в шейкер ,интенсивно встряхнуть передить в охлажденный бокал шале,декор цедра лимон", "glass_tech": "Шейк,Шале", "steps": "Все ингридиенты добавить в шейкер ,интенсивно встряхнуть передить в охлажденный бокал шале,декор цедра лимон"}, {"category": "На водке", "name": "Московский мул 0.2мл", "ingredients": "Водка Зерно 40мл,кордиал имбирь 30мл,сахарный сироп 20 мл ,молочная кислП/Ф 10мл,имбирный эль 100мл", "method": "Билд,медная кружка Московский Мул; все ингридиенты добавить в кружку,лед кубики,перемешать барной ложкой добавить имбирный эль,сверху свежий колотый лед,декор мята и сахарная пудра.", "glass_tech": "Билд,медная кружка Московский Мул", "steps": "все ингридиенты добавить в кружку,лед кубики,перемешать барной ложкой добавить имбирный эль,сверху свежий колотый лед,декор мята и сахарная пудра."}, {"category": "На водке", "name": "Белый руский 0,09мл", "ingredients": "Водка Зерно 40мл,ликер кофейный 20мл,сливки 10% 20мл", "method": "Билд Рокс; все ингридиенты добавить на лед в рокс", "glass_tech": "Билд Рокс", "steps": "все ингридиенты добавить на лед в рокс"}, {"category": "На водке", "name": "ПорнСтар 0.18мл", "ingredients": "Водка Зерно 50мл,Игристое Меланж 80мл,сироп Ваниль 15мл,Пюре маракуя 30мл", "method": "Шале,Стир-стрейн;В смесительный стакан со льдом добавляем все ингридиенты кроме игристого,интенсивно стируем,отфильтровываем в охл.бокал шале ,игристое по запросу добавить в коктейль или подадь рядом в дегустационном бокале,декор цедра апельсин", "glass_tech": "Шале,Стир-стрейн", "steps": "В смесительный стакан со льдом добавляем все ингридиенты кроме игристого,интенсивно стируем,отфильтровываем в охл.бокал шале ,игристое по запросу добавить в коктейль или подадь рядом в дегустационном бокале,декор цедра апельсин"}, {"category": "На текиле", "name": "Маргарита 0.1мл", "ingredients": "Текила Диего и Мария 50мл,Ликер Трипл Сек 20мл,молоч.кисл П\\Ф 20мл,сах.сироп 10мл,лайм свежий 10гр,соль морская 1гр", "method": "Шале,шейк дабл стрейн;Все ингридиенты добавить в шейкер интенсивно встряхнуть ,отфильтровать в охлажденный бокал шале,декор кайма из морской соли на половину бокала,слаиз лаим", "glass_tech": "Шале,шейк дабл стрейн", "steps": "Все ингридиенты добавить в шейкер интенсивно встряхнуть ,отфильтровать в охлажденный бокал шале,декор кайма из морской соли на половину бокала,слаиз лаим"}, {"category": "На текиле", "name": "Эль Диаболо 0.22мл", "ingredients": "Текила Диего и Мария 50мл,Ликер Крем Де Касис 15мл,молоч кисл П\\Ф 20мл,сах.сироп 10мл,пбре Черн смород 15гр,Имбирный эль 125мл,Лаим 20гр,мята 5гр", "method": "Рокс,шейк пур;Все ингридиенты добавить в шейкер кроме содовой,интенсивно потрясти,перелить все содеожимое в рокс,добавить эль,перемешать барной ложкой,добавить колотый лед сверху,декор чипс лайм ,пучок мята", "glass_tech": "Рокс,шейк пур", "steps": "Все ингридиенты добавить в шейкер кроме содовой,интенсивно потрясти,перелить все содеожимое в рокс,добавить эль,перемешать барной ложкой,добавить колотый лед сверху,декор чипс лайм ,пучок мята"}, {"category": "На текиле", "name": "Лонг Айленд Айс Ти 0.4мл", "ingredients": "Ром коладос бел 30мл,ТриплСек 30мл,Водка Архангельская 30мл,Джин Саут Банк 30мл,Текила Диего и Мария бел 30мл ,сахар.сироп 10мл,молочн. Кисл 20мл,кока кола 0.2мл,свеж лайм 20гр.", "method": "Дабл рокс,шейк пур;Все ингридиенты кроме колы добавить в шейкер на лед ,интенсивно встряхнуть,перелить все содержимое в охлажденный дабл рокс, сверху долить колу,декор добавить колотый лед,слайз лайм.", "glass_tech": "Дабл рокс,шейк пур", "steps": "Все ингридиенты кроме колы добавить в шейкер на лед ,интенсивно встряхнуть,перелить все содержимое в охлажденный дабл рокс, сверху долить колу,декор добавить колотый лед,слайз лайм."}, {"category": "На текиле", "name": "Драй Мартини", "ingredients": "Джин Хопперс 50мл,Сухой Мартин и 20мл ,оливка 5гр", "method": "Шале,билд &стир;Все ингридиенты добавить в смесительный стакан на лед ,интенсивно перемешать ,отфильтровать в охлажденный бакал шале,декор оливка", "glass_tech": "Шале,билд &стир", "steps": "Все ингридиенты добавить в смесительный стакан на лед ,интенсивно перемешать ,отфильтровать в охлажденный бакал шале,декор оливка"}];
+let answered=0, correct=0, quizQuestions=[], qIndex=0, currentAnswered=false;
+const $=id=>document.getElementById(id);
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function switchTab(tab){
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===tab));
+ document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+}
+function init(){
+ const cats=[...new Set(recipes.map(r=>r.category))];
+ cats.forEach(c=>{let o=document.createElement('option');o.value=c;o.textContent=c;$('categoryFilter').appendChild(o)});
+ recipes.forEach((r,i)=>{let o=document.createElement('option');o.value=i;o.textContent=r.name;$('buildRecipe').appendChild(o)});
+ renderRecipes();
+}
+function renderRecipes(){
+ let cat=$('categoryFilter').value, term=$('search').value.toLowerCase().trim();
+ const filtered=recipes.map((r,i)=>({...r,index:i})).filter(r=>(cat==='all'||r.category===cat)&&r.name.toLowerCase().includes(term));
+ $('recipeList').innerHTML=filtered.map(r=>`<button class="recipe" onclick="showRecipe(${r.index})"><strong>${esc(r.name)}</strong><small>${esc(r.category)}</small><div class="muted">${esc(r.glass_tech||'Посуда/техника не выделены отдельно')}</div></button>`).join('')||'<p class="muted">Ничего не найдено.</p>';
+}
+function showRecipe(i){
+ const r=recipes[i];
+ $('recipeDetail').innerHTML=`<div class="detail"><span class="tag">${esc(r.category)}</span><h2 style="margin-top:10px">${esc(r.name)}</h2><h3>Ингредиенты и дозировки</h3><div class="raw">${esc(r.ingredients)}</div><h3 style="margin-top:14px">Посуда и техника</h3><div class="raw">${esc(r.glass_tech||'В исходной ТТК отдельно не указано')}</div><h3 style="margin-top:14px">Технология и подача</h3><div class="raw">${esc(r.steps||'В исходной ТТК не указано')}</div><div class="controls"><button class="btn" onclick="startQuiz('one',${i})">Проверить знания по коктейлю</button><button class="btn secondary" onclick="switchTab('build');$('buildRecipe').value='${i}';$('buildResult').innerHTML=''">Собрать по памяти</button></div></div>`;
+}
+function makeQuestions(mode='all',onlyIndex=null){
+ let arr=[];
+ const pool=onlyIndex===null?recipes.map((r,i)=>({...r,index:i})): [{...recipes[onlyIndex],index:onlyIndex}];
+ pool.forEach(r=>{
+  let ingParts=r.ingredients.split(/[,;]/).map(x=>x.trim()).filter(Boolean);
+  if(mode==='all'||mode==='ingredients'){
+   if(ingParts.length){
+    const target=ingParts[Math.floor(Math.random()*ingParts.length)];
+    const distract=recipes.filter(x=>x.name!==r.name).map(x=>x.ingredients.split(/[,;]/).map(y=>y.trim()).filter(Boolean)).flat().filter(x=>x&&x!==target);
+    const opts=[target,...[...new Set(distract)].sort(()=>Math.random()-.5).slice(0,3)].sort(()=>Math.random()-.5);
+    arr.push({type:'ingredients',recipe:r,question:`Какой из вариантов — ингредиент/дозировка из ТТК «${r.name}»?`,options:opts,answer:target,explain:r.ingredients});
+   }
+  }
+  if(mode==='all'||mode==='method'){
+   if(r.glass_tech){
+    const others=[...new Set(recipes.map(x=>x.glass_tech).filter(x=>x&&x!==r.glass_tech))].sort(()=>Math.random()-.5).slice(0,3);
+    const opts=[r.glass_tech,...others].sort(()=>Math.random()-.5);
+    arr.push({type:'method',recipe:r,question:`Что указано в графе посуды/техники для «${r.name}»?`,options:opts,answer:r.glass_tech,explain:r.glass_tech});
+   }
+  }
+  if(mode==='all'||mode==='steps'){
+   if(r.steps){
+    arr.push({type:'steps',recipe:r,question:`Как описана технология приготовления «${r.name}» в исходной ТТК?`,options:null,answer:null,explain:r.steps});
+   }
+  }
+ });
+ return arr.sort(()=>Math.random()-.5);
+}
+function startQuiz(special='all',idx=null){
+ switchTab('quiz');
+ let mode=special==='one'?'all':$('quizMode').value;
+ quizQuestions=makeQuestions(mode,idx);
+ if(!quizQuestions.length){$('quizArea').innerHTML='<p>Для выбранного режима нет достаточных данных в ТТК.</p>';return;}
+ const count=$('quizCount').value==='all'?quizQuestions.length:parseInt($('quizCount').value,10);
+ quizQuestions=quizQuestions.slice(0,count);
+ qIndex=0;currentAnswered=false;renderQuestion();
+}
+function renderQuestion(){
+ if(qIndex>=quizQuestions.length){
+  const pct=answered?Math.round(correct/answered*100):0;
+  $('quizArea').innerHTML=`<h3>Тест завершён</h3><p>Ответов за всё время: <b>${answered}</b>. Правильных: <b>${correct}</b>. Точность: <b>${pct}%</b>.</p><p class="muted">Для повторной попытки запусти тест заново.</p><button class="btn" onclick="startQuiz()">Пройти ещё раз</button>`;
+  updateStats();return;
+ }
+ const q=quizQuestions[qIndex];currentAnswered=false;
+ let content=`<div class="muted">Вопрос ${qIndex+1} из ${quizQuestions.length} · ${esc(q.recipe.name)}</div><div class="progress"><div style="width:${qIndex/quizQuestions.length*100}%"></div></div><div class="question">${esc(q.question)}</div>`;
+ if(q.options){
+  content+=`<div class="options">${q.options.map((o,i)=>`<button class="option" onclick="answerOption(${i})">${'ABCD'[i]}. ${esc(o)}</button>`).join('')}</div>`;
+ } else {
+  content+=`<p>${esc(q.explain)}</p><button class="btn" onclick="revealTextAnswer()">Показать эталон</button>`;
+ }
+ content+=`<div id="feedback" class="feedback"></div><div class="controls"><button class="btn secondary" id="nextQ" onclick="nextQuestion()" disabled>${qIndex===quizQuestions.length-1?'Завершить':'Следующий вопрос'}</button></div>`;
+ $('quizArea').innerHTML=content;
+}
+function answerOption(i){
+ if(currentAnswered)return;currentAnswered=true;
+ const q=quizQuestions[qIndex], chosen=q.options[i], ok=chosen===q.answer;
+ answered++;if(ok)correct++;
+ document.querySelectorAll('.option').forEach((b,j)=>{b.disabled=true;if(q.options[j]===q.answer)b.classList.add('correct');if(j===i&&!ok)b.classList.add('wrong')});
+ const f=$('feedback');f.className='feedback show '+(ok?'ok':'no');f.innerHTML=`<b>${ok?'Верно!':'Нужно повторить.'}</b><br>Коктейль: ${esc(q.recipe.name)}<br><span class="muted">Сверка с исходной ТТК: ${esc(q.explain)}</span>`;
+ $('nextQ').disabled=false;updateStats();
+}
+function revealTextAnswer(){
+ if(currentAnswered)return;currentAnswered=true;
+ const q=quizQuestions[qIndex];const f=$('feedback');f.className='feedback show';f.innerHTML=`<b>Эталон из ТТК</b><br>${esc(q.explain)}`;
+ $('nextQ').disabled=false;
+}
+function nextQuestion(){qIndex++;renderQuestion();}
+function updateStats(){
+ $('answered').textContent=answered;$('correct').textContent=correct;$('percent').textContent=answered?Math.round(correct/answered*100)+'%':'—';$('progressbar').style.width=(answered?Math.round(correct/answered*100):0)+'%';
+}
+function resetSession(){answered=0;correct=0;updateStats();$('quizArea').innerHTML='<p class="muted">Результат сброшен. Начни новый тест.</p>';}
+function revealBuild(){
+ const i=parseInt($('buildRecipe').value,10),r=recipes[i];
+ $('buildResult').innerHTML=`<div class="detail"><h3>Эталон по исходной ТТК</h3><p><b>Коктейль:</b> ${esc(r.name)}</p><p><b>Ингредиенты и дозировки</b></p><div class="raw">${esc(r.ingredients)}</div><p><b>Посуда / техника</b></p><div class="raw">${esc(r.glass_tech||'Не указано отдельно')}</div><p><b>Технология / подача</b></p><div class="raw">${esc(r.steps||'Не указано')}</div><p class="muted">Сравни свои ответы с эталоном и отметь, что нужно повторить.</p></div>`;
+}
+function clearBuild(){$('buildAnswer').value='';$('buildMethod').value='';$('buildResult').innerHTML='';}
+function randomRecipe(){
+ const i=Math.floor(Math.random()*recipes.length),r=recipes[i];
+ $('randomCard').innerHTML=`<span class="tag">${esc(r.category)}</span><h3 style="margin-top:10px">${esc(r.name)}</h3><p><b>Сначала ответь по памяти:</b> назови состав, дозировки, посуду, технику и порядок приготовления. Затем нажми показать.</p><button class="btn" onclick="showRandomAnswer(${i})">Показать эталон</button>`;
+}
+function showRandomAnswer(i){
+ const r=recipes[i];$('randomCard').innerHTML=`<h3>${esc(r.name)}</h3><p><b>Ингредиенты:</b></p><div class="raw">${esc(r.ingredients)}</div><p><b>Посуда / техника:</b></p><div class="raw">${esc(r.glass_tech||'Не указано отдельно')}</div><p><b>Технология:</b></p><div class="raw">${esc(r.steps||'Не указано')}</div><button class="btn secondary" onclick="randomRecipe()">Следующий случайный коктейль</button>`;
+}
+init();
+</script>
+</body></html>
